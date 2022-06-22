@@ -193,8 +193,8 @@ char *PIECE[8][8]{"r", "n", "b", "q", "k", "b", "n", "r", "p", "p", "p",
                   "p", "p", "p", "p", "p", "x", "x", "x", "x", "x", "x",
                   "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x",
                   "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x",
-                  "x", "x", "x", "x", "p", "p", "p", "p", "p", "p", "p",
-                  "p", "r", "n", "b", "q", "k", "b", "n", "r"};
+                  "x", "x", "x", "x", "P", "P", "P", "P", "P", "P", "P",
+                  "P", "R", "N", "B", "Q", "K", "B", "N", "R"};
 
 void setup()
 {
@@ -249,8 +249,9 @@ void loop()
 
   int oldgx, oldgy, newgx, newgy;
   // select
-  bool notYetChange = true;
-  while (notYetChange)
+  bool game = true;
+  bool turn = true; // ture -> white, false -> black
+  while (game)
   {
     readCoordinates();
     Serial.print(cx);
@@ -288,7 +289,7 @@ void loop()
     PIECE[newgy][newgx] = tmp;
     drawBoard();
     setPieces();
-    notYetChange = false;
+    // notYetChange = false;
   }
 
   readCoordinates();
@@ -574,5 +575,127 @@ void setPieces()
       if (PIECE[y][x] != "x")
         tft.print(PIECE[y][x]);
     }
+  }
+}
+
+bool checkValid(int oldx, int oldy, int newx, int newy)
+{
+  switch (PIECE[oldy][oldx])
+  {
+  case "p":
+    if (oldy == 1)
+    {
+      // go straight
+      if (oldx == newx)
+      {
+        return (newy == oldy + 1 && PIECE[newy][newx] == "x") ||
+               (newy == oldy + 2 && PIECE[newy - 1][newx] == "x" &&
+                PIECE[newy][newx] == "x");
+      }
+      // attack
+      else
+      {
+        return (newx == oldx - 1 || newx == oldx + 1) &&
+               newy == oldy + 1 && PIECE[newy][newx] != "x";
+      }
+    }
+    else
+    {
+      // go straight
+      if (oldx == newx)
+      {
+        return (newy == oldy + 1 && PIECE[newy][newx] == "x");
+      }
+      // attack
+      else
+      {
+        return (newx == oldx - 1 || newx == oldx + 1) &&
+               newy == oldy + 1 && PIECE[newy][newx] != "x";
+      }
+    }
+    break;
+  case "P":
+    if (oldy == 1)
+    {
+      // go straight
+      if (oldx == newx)
+      {
+        return (newy == oldy - 1 && PIECE[newy][newx] == "x") ||
+               (newy == oldy - 2 && PIECE[newy + 1][newx] == "x" &&
+                PIECE[newy][newx] == "x");
+      }
+      // attack
+      else
+      {
+        return (newx == oldx - 1 || newx == oldx + 1) &&
+               newy == oldy - 1 && PIECE[newy][newx] != "x";
+      }
+    }
+    else
+    {
+      // go straight
+      if (oldx == newx)
+      {
+        return (newy == oldy - 1 && PIECE[newy][newx] == "x");
+      }
+      // attack
+      else
+      {
+        return (newx == oldx - 1 || newx == oldx + 1) &&
+               newy == oldy - 1 && PIECE[newy][newx] != "x";
+      }
+    }
+    break;
+  case "r":
+    if (oldx == newx)
+    {
+      if (newy > oldy)
+      {
+        // have abstacle
+        for (int i = oldy + 1; i < newy; i++)
+          if (PIECE[i][oldx] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+      else
+      {
+        // have abstacle
+        for (int i = newy + 1; i < oldy; i++)
+          if (PIECE[i][oldx] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+    }
+    else if (oldy == newy)
+    {
+      if (newx > oldx)
+      {
+        // have abstacle
+        for (int i = oldx + 1; i < newx; i++)
+          if (PIECE[oldy][i] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+      else
+      {
+        // have abstacle
+        for (int i = newx + 1; i < oldx; i++)
+          if (PIECE[oldy][i] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+    }
+    return false;
+    break;
+  default:
+    break;
   }
 }
