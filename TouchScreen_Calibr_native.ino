@@ -695,6 +695,110 @@ bool checkValid(int oldx, int oldy, int newx, int newy)
     }
     return false;
     break;
+  case "R":
+    if (oldx == newx)
+    {
+      if (newy > oldy)
+      {
+        // have abstacle
+        for (int i = oldy + 1; i < newy; i++)
+          if (PIECE[i][oldx] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "a" && PIECE[newy][newx] <= "z") ||
+               PIECE[newy][newx] == "x";
+      }
+      else
+      {
+        // have abstacle
+        for (int i = newy + 1; i < oldy; i++)
+          if (PIECE[i][oldx] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "a" && PIECE[newy][newx] <= "z") ||
+               PIECE[newy][newx] == "x";
+      }
+    }
+    else if (oldy == newy)
+    {
+      if (newx > oldx)
+      {
+        // have abstacle
+        for (int i = oldx + 1; i < newx; i++)
+          if (PIECE[oldy][i] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "a" && PIECE[newy][newx] <= "z") ||
+               PIECE[newy][newx] == "x";
+      }
+      else
+      {
+        // have abstacle
+        for (int i = newx + 1; i < oldx; i++)
+          if (PIECE[oldy][i] != "x")
+            return false;
+        // attack or place
+        return (PIECE[newy][newx] >= "a" && PIECE[newy][newx] <= "z") ||
+               PIECE[newy][newx] == "x";
+      }
+    }
+    return false;
+    break;
+  case "n":
+    return (((newy == oldy + 1 || newy == oldy - 1) &&
+             (newx == oldx + 2 || newx == oldx - 2)) ||
+            ((newy == oldy + 2 || newy == oldy - 2) &&
+             (newx == oldx + 1 || newx == oldx - 1))) &&
+           ((PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+            PIECE[newy][newx] == "x");
+    break;
+  case "N":
+    return (((newy == oldy + 1 || newy == oldy - 1) &&
+             (newx == oldx + 2 || newx == oldx - 2)) ||
+            ((newy == oldy + 2 || newy == oldy - 2) &&
+             (newx == oldx + 1 || newx == oldx - 1))) &&
+           ((PIECE[newy][newx] >= "a" && PIECE[newy][newx] <= "z") ||
+            PIECE[newy][newx] == "x");
+    break;
+  case "b":
+    if (newx + newy == oldx + oldy)
+    {
+      if (newx < oldx)
+      {
+        for (int i = newx + 1; i < oldx; i++)
+        {
+          if (PIECE[newy + newx - i][i] != "x")
+            return false;
+        }
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+      else
+      {
+        for (int i = oldx + 1; i < newx; i++)
+        {
+          if (PIECE[oldy + oldx - i][i] != "x")
+            return false;
+        }
+        return (PIECE[newy][newx] >= "A" && PIECE[newy][newx] <= "Z") ||
+               PIECE[newy][newx] == "x";
+      }
+    }
+    if (newx - newy == oldx - oldy)
+    {
+      if (newx < oldx)
+      {
+        for (int i = new + 1; i < oldx; i++)
+        {
+          
+        }
+      }
+    }
+    if (newx - newy == oldy - oldx)
+    {
+    }
+    return false;
+    break;
   default:
     break;
   }
