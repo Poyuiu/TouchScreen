@@ -9,7 +9,12 @@
 #define Serial SerialUSB
 #endif
 
-#define SWAP(x, y) {int t = x;x = y;y = t;}
+#define SWAP(x, y) \
+  {                \
+    int t = x;     \
+    x = y;         \
+    y = t;         \
+  }
 
 #define TITLE "TouchScreen.h GFX Calibration"
 #include <Adafruit_GFX.h>
@@ -54,11 +59,11 @@ uint16_t readID(void)
 }
 #define TFT_BEGIN() tft.begin(ID)
 
-#define WHITE 0xFFFF
+#define WWHITE 0xFFFF
 #define RED 0xF800
 #define BLUE 0x011F
 #define GREEN 0x07E0
-#define BLACK 0x0000
+#define BBLACK 0x0000
 
 //#define GRAY  0x2408        //un-highlighted cross-hair
 #define GRAY BLUE     // idle cross-hair colour
@@ -237,7 +242,7 @@ void loop()
   startup();
 
   int x, y, cntx = 0, cnty = 0, idx = 0;
-  tft.fillScreen(BLACK);
+  tft.fillScreen(BBLACK);
   drawBoard();
 
   setPieces();
@@ -277,7 +282,7 @@ void loop()
     // tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
     //              RED);
     tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
-                 (oldgx + oldgy) % 2 == 0 ? WHITE : BLUE);
+                 (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
 
     char *tmp = PIECE[oldgy][oldgx];
     PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
@@ -384,7 +389,7 @@ void readCoordinates()
 
 void calibrate(int x, int y, int i, String msg)
 {
-  drawCrossHair(x, y, WHITE);
+  drawCrossHair(x, y, WWHITE);
   readCoordinates();
   centerprint("* RELEASE *", text_y_center);
   drawCrossHair(x, y, GRAY_DONE);
@@ -486,7 +491,7 @@ void drawCrossHair(int x, int y, uint16_t color)
 void centerprint(const char *s, int y)
 {
   int len = strlen(s) * 6;
-  tft.setTextColor(WHITE, RED);
+  tft.setTextColor(WWHITE, RED);
   tft.setCursor((dispx - len) / 2, y);
   tft.print(s);
 }
@@ -500,12 +505,12 @@ void buttonPrint(const char *s, int y, int words_color, int bg_color)
 
 void centertitle(const char *s)
 {
-  tft.fillScreen(BLACK);
+  tft.fillScreen(BBLACK);
   tft.fillRect(0, 0, dispx, 14, RED);
-  tft.fillRect(0, 14, dispx, 1, WHITE);
+  tft.fillRect(0, 14, dispx, 1, WWHITE);
   centerprint(s, 1);
   tft.setCursor(0, 30);
-  tft.setTextColor(WHITE, BLACK);
+  tft.setTextColor(WWHITE, BBLACK);
 }
 
 void startup()
@@ -513,9 +518,9 @@ void startup()
   centertitle("Chess Game Box");
 
   tft.fillRect(dispx / 4, dispy / 3, dispx / 2, 40, BLUE);
-  tft.fillRect(dispx / 4, dispy * 2 / 3, dispx / 2, 40, WHITE);
-  buttonPrint("Simple AI", dispy / 3 + 20, WHITE, BLUE);
-  buttonPrint("Normal", dispy * 2 / 3 + 20, BLACK, WHITE);
+  tft.fillRect(dispx / 4, dispy * 2 / 3, dispx / 2, 40, WWHITE);
+  buttonPrint("Simple AI", dispy / 3 + 20, WWHITE, BLUE);
+  buttonPrint("Normal", dispy * 2 / 3 + 20, BBLACK, WWHITE);
   while (ISPRESSED() == false)
   {
   }
@@ -550,7 +555,7 @@ void drawBoard()
     for (y = 0; y < dispx; y += dispx / 8)
     {
       if ((cntx + cnty) % 2 == 0)
-        tft.fillRect(x, y, dispx / 8, dispx / 8, WHITE);
+        tft.fillRect(x, y, dispx / 8, dispx / 8, WWHITE);
       else
         tft.fillRect(x, y, dispx / 8, dispx / 8, BLUE);
       cnty++;
@@ -561,7 +566,7 @@ void drawBoard()
 
 void setPieces()
 {
-  tft.setTextColor(WHITE, BLACK);
+  tft.setTextColor(WWHITE, BBLACK);
   for (int x = 0; x < 8; x++)
   {
     for (int y = 0; y < 8; y++)
@@ -573,7 +578,7 @@ void setPieces()
   }
 }
 
-bool checkValid(int oldx, int oldy, int newx, int newy)
+/* bool checkValid(int oldx, int oldy, int newx, int newy)
 {
   switch (PIECE[oldy][oldx])
   {
@@ -796,4 +801,4 @@ bool checkValid(int oldx, int oldy, int newx, int newy)
   default:
     break;
   }
-}
+} */
