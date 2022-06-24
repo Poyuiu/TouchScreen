@@ -9,12 +9,7 @@
 #define Serial SerialUSB
 #endif
 
-#define SWAP(x, y) \
-  {                \
-    int t = x;     \
-    x = y;         \
-    y = t;         \
-  }
+#define SWAP(x, y) {int t = x;x = y;y = t;}
 
 #define TITLE "TouchScreen.h GFX Calibration"
 #include <Adafruit_GFX.h>
@@ -790,7 +785,6 @@ bool checkValid(int oldx, int oldy, int newx, int newy)
       {
         for (int i = new + 1; i < oldx; i++)
         {
-          
         }
       }
     }
