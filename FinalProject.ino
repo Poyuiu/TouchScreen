@@ -36,9 +36,11 @@ int XP = 8, YP = A3, XM = A2, YM = 9; // next common configuration
 #else
 #include <TouchScreen.h> //Adafruit Library
 #endif
+
 TouchScreen ts(XP, YP, XM, YM, 300); // re-initialised after diagnose
 TSPoint tp;                          // global point
-
+#include <Square.h>                  // my-chess-game -> Square
+#include <Board.h>
 void readResistiveTouch(void)
 {
   tp = ts.getPoint();
@@ -195,9 +197,10 @@ char *PIECE[8][8]{"r", "n", "b", "q", "k", "b", "n", "r", "p", "p", "p",
                   "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x",
                   "x", "x", "x", "x", "P", "P", "P", "P", "P", "P", "P",
                   "P", "R", "N", "B", "Q", "K", "B", "N", "R"};
-
+Board b(0);
 void setup()
 {
+  b.setBoard();
   char buf[40];
   uint16_t ID = readID();
   TFT_BEGIN();
@@ -564,16 +567,58 @@ void drawBoard()
   }
 }
 
+// void setPieces()
+// {
+//   tft.setTextColor(WWHITE, BBLACK);
+//   for (int x = 0; x < 8; x++)
+//   {
+//     for (int y = 0; y < 8; y++)
+//     {
+//       tft.setCursor(COR[x], COR[y]);
+//       if (PIECE[y][x] != "x")
+//         tft.print(PIECE[y][x]);
+//     }
+//   }
+// }
+
 void setPieces()
 {
   tft.setTextColor(WWHITE, BBLACK);
-  for (int x = 0; x < 8; x++)
+  for (int i = 0; i < 8; i++)
   {
-    for (int y = 0; y < 8; y++)
+    for (int j = 0; j < 8; j++)
     {
-      tft.setCursor(COR[x], COR[y]);
-      if (PIECE[y][x] != "x")
-        tft.print(PIECE[y][x]);
+      Square* square = b.getSquare(i, j);
+      Piece p = square->getPiece();
+      Color c = square->getColor();
+
+      tft.setCursor(COR[i], COR[j]);
+
+      switch (p)
+      {
+      case KING:
+        (c == WHITE) ? tft.print("K") : tft.print("k");
+        break;
+      case QUEEN:
+        (c == WHITE) ? tft.print("Q") : tft.print("q");
+        break;
+      case BISHOP:
+        (c == WHITE) ? tft.print("B") : tft.print("b");
+        break;
+      case KNIGHT:
+        (c == WHITE) ? tft.print("N") : tft.print("n");
+        break;
+      case ROOK:
+        (c == WHITE) ? tft.print("R") : tft.print("r");
+        break;
+      case PAWN:
+        (c == WHITE) ? tft.print("P") : tft.print("p");
+        break;
+      case EMPTY:
+        break;
+      default:
+        break;
+      }
     }
   }
 }
