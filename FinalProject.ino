@@ -252,18 +252,25 @@ void loop()
 
   int oldgx, oldgy, newgx, newgy;
   // select
-  bool game = true;
-  bool turn = true; // ture -> white, false -> black
+  bool game = true;   // game loop
+  Color turn = BLACK; // face to user is white
   while (game)
   {
-    readCoordinates();
-    Serial.print(cx);
-    Serial.print(" ");
-    Serial.println(cy);
-    oldgx = (900 - cx) / 90, oldgy = (945 - cy) / 72.5;
+    // select
+    do
+    {
+      readCoordinates();
+      Serial.print(cx);
+      Serial.print(" ");
+      Serial.println(cy);
+      oldgx = (900 - cx) / 90, oldgy = (945 - cy) / 72.5;
+
+    } while (b.getSquare(oldgx, oldgy)->getColor() != turn);
+
+    // slect to be red
     tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
                  RED);
-
+    // move
     do
     {
       readCoordinates();
@@ -271,33 +278,48 @@ void loop()
       Serial.print(" ");
       Serial.println(cy);
       newgx = (900 - cx) / 90, newgy = (945 - cy) / 72.5;
-    } while (newgx == oldgx && newgy == oldgy);
+    } while ((newgx == oldgx && newgy == oldgy) ||
+             b.makeMove(oldgx, oldgy, newgx, newgy) == false);
 
+    // not GG
+    if (b.getSquare(newgx, newgy)->getPiece() == KING)
+    {
+      game = false;
+    }
+
+    // For Debug
     Serial.print("old x: ");
     Serial.print(oldgx);
     Serial.print(" old y: ");
     Serial.println(oldgy);
 
+    // For Debug
     Serial.print("new x: ");
     Serial.print(newgx);
     Serial.print(" new y: ");
     Serial.println(newgy);
+
     // tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
     //              RED);
+
+    // Color recovery
     tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
                  (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
 
-    char *tmp = PIECE[oldgy][oldgx];
-    PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
-    PIECE[newgy][newgx] = tmp;
+    // char *tmp = PIECE[oldgy][oldgx];
+    // PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
+    // PIECE[newgy][newgx] = tmp;
+
+    // show the board after move
     drawBoard();
     setPieces();
+    turn = turn == BLACK ? WHITE : BLACK;
     // notYetChange = false;
   }
 
-  readCoordinates();
-  Serial.println(cx);
-  Serial.println(cy);
+  // readCoordinates();
+  // Serial.println(cx);
+  // Serial.println(cy);
   //
 
   // cals = (long(dispx - 1) << 12) + (dispy - 1);
@@ -333,9 +355,9 @@ void loop()
   //     cals |= (1L << 31);
 
   // report();          // report results
-  while (true)
-  {
-  } // tread water
+  // while (true)
+  // {
+  // } // tread water
 }
 
 void readCoordinates()
@@ -588,7 +610,7 @@ void setPieces()
   {
     for (int j = 0; j < 8; j++)
     {
-      Square* square = b.getSquare(i, j);
+      Square *square = b.getSquare(i, j);
       Piece p = square->getPiece();
       Color c = square->getColor();
 
