@@ -247,7 +247,7 @@ void loop()
   int x, y, cntx = 0, cnty = 0, idx = 0;
   tft.fillScreen(BBLACK);
   drawBoard();
-
+  b.setBoard();
   setPieces();
 
   int oldgx, oldgy, newgx, newgy;
@@ -278,14 +278,19 @@ void loop()
       Serial.print(" ");
       Serial.println(cy);
       newgx = (900 - cx) / 90, newgy = (945 - cy) / 72.5;
+
+      // change the selected
+      if (b.getSquare(newgx, newgy)->getColor() == turn)
+      {
+        tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
+                     RED);
+        tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                     (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
+        oldgx = newgx, oldgy = newgy;
+      }
+
     } while ((newgx == oldgx && newgy == oldgy) ||
              b.makeMove(oldgx, oldgy, newgx, newgy) == false);
-
-    // not GG
-    if (b.getSquare(newgx, newgy)->getPiece() == KING)
-    {
-      game = false;
-    }
 
     // For Debug
     Serial.print("old x: ");
