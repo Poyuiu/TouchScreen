@@ -320,6 +320,13 @@ void loop()
     setPieces();
     turn = turn == BLACK ? WHITE : BLACK;
     // notYetChange = false;
+
+    // check if it is checkmate
+    if (b.checkCheckMate() != NONE)
+    {
+      game = false;
+      endGameReport();
+    }
   }
 
   // readCoordinates();
@@ -558,6 +565,33 @@ void startup()
   {
   }
   //    waitForTouch();
+}
+
+void endGameReport()
+{
+  tft.fillScreen(BBLACK);
+  centertitle("EndGame Report");
+  tft.setTextSize(3);
+  tft.setTextColor(WWHITE);
+  tft.setCursor(5, 150);
+  if (b.checkCheckMate() == WHITE)
+  {
+    tft.println("BLACK WIN !!!");
+  }
+  else
+  {
+    tft.println("WHITE WIN !!!");
+  }
+  tft.setTextSize(1);
+  centerprint("tap to continue", 230);
+
+  // two while loops implement tap to continue
+  while (ISPRESSED() == false)
+  {
+  }
+  while (ISPRESSED() == true)
+  {
+  }
 }
 
 void fail()
