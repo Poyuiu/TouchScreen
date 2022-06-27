@@ -190,6 +190,7 @@ bool diagnose_pins()
 #endif
 
 int COR[8];
+int gameMode = -1;
 
 char *PIECE[8][8]{"r", "n", "b", "q", "k", "b", "n", "r", "p", "p", "p",
                   "p", "p", "p", "p", "p", "x", "x", "x", "x", "x", "x",
@@ -254,81 +255,162 @@ void loop()
   // select
   bool game = true;   // game loop
   Color turn = BLACK; // face to user is white
-  while (game)
+
+  // simple two player chess game
+  if (gameMode == 1)
   {
-    // select
-    do
+    while (game)
     {
-      readCoordinates();
-      Serial.print(cx);
-      Serial.print(" ");
-      Serial.println(cy);
-      oldgx = (900 - cx) / 90, oldgy = (945 - cy) / 72.5;
-
-    } while (b.getSquare(oldgx, oldgy)->getColor() != turn);
-
-    // slect to be red
-    tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
-                 RED);
-    // move
-    do
-    {
-      readCoordinates();
-      Serial.print(cx);
-      Serial.print(" ");
-      Serial.println(cy);
-      newgx = (900 - cx) / 90, newgy = (945 - cy) / 72.5;
-
-      // change the selected
-      if (b.getSquare(newgx, newgy)->getColor() == turn)
+      // select
+      do
       {
-        tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
-                     RED);
-        tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
-                     (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
-        oldgx = newgx, oldgy = newgy;
+        readCoordinates();
+        Serial.print(cx);
+        Serial.print(" ");
+        Serial.println(cy);
+        oldgx = (900 - cx) / 90, oldgy = (945 - cy) / 72.5;
+
+      } while (b.getSquare(oldgx, oldgy)->getColor() != turn);
+
+      // slect to be red
+      tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                   RED);
+      // move
+      do
+      {
+        readCoordinates();
+        Serial.print(cx);
+        Serial.print(" ");
+        Serial.println(cy);
+        newgx = (900 - cx) / 90, newgy = (945 - cy) / 72.5;
+
+        // change the selected
+        if (b.getSquare(newgx, newgy)->getColor() == turn)
+        {
+          tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
+                       RED);
+          tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                       (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
+          oldgx = newgx, oldgy = newgy;
+        }
+
+      } while ((newgx == oldgx && newgy == oldgy) ||
+               b.makeMove(oldgx, oldgy, newgx, newgy) == false);
+
+      // For Debug
+      Serial.print("old x: ");
+      Serial.print(oldgx);
+      Serial.print(" old y: ");
+      Serial.println(oldgy);
+
+      // For Debug
+      Serial.print("new x: ");
+      Serial.print(newgx);
+      Serial.print(" new y: ");
+      Serial.println(newgy);
+
+      // tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
+      //              RED);
+
+      // Color recovery
+      tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                   (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
+
+      // char *tmp = PIECE[oldgy][oldgx];
+      // PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
+      // PIECE[newgy][newgx] = tmp;
+
+      // show the board after move
+      drawBoard();
+      setPieces();
+      turn = turn == BLACK ? WHITE : BLACK;
+      // notYetChange = false;
+
+      // check if it is checkmate
+      if (b.checkCheckMate() != NONE)
+      {
+        game = false;
+        endGameReport();
       }
-
-    } while ((newgx == oldgx && newgy == oldgy) ||
-             b.makeMove(oldgx, oldgy, newgx, newgy) == false);
-
-    // For Debug
-    Serial.print("old x: ");
-    Serial.print(oldgx);
-    Serial.print(" old y: ");
-    Serial.println(oldgy);
-
-    // For Debug
-    Serial.print("new x: ");
-    Serial.print(newgx);
-    Serial.print(" new y: ");
-    Serial.println(newgy);
-
-    // tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
-    //              RED);
-
-    // Color recovery
-    tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
-                 (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
-
-    // char *tmp = PIECE[oldgy][oldgx];
-    // PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
-    // PIECE[newgy][newgx] = tmp;
-
-    // show the board after move
-    drawBoard();
-    setPieces();
-    turn = turn == BLACK ? WHITE : BLACK;
-    // notYetChange = false;
-
-    // check if it is checkmate
-    if (b.checkCheckMate() != NONE)
-    {
-      game = false;
-      endGameReport();
     }
   }
+  else if (gameMode == 0)
+  {
+    while (game)
+    {
+      // select
+      do
+      {
+        readCoordinates();
+        Serial.print(cx);
+        Serial.print(" ");
+        Serial.println(cy);
+        oldgx = (900 - cx) / 90, oldgy = (945 - cy) / 72.5;
 
+      } while (b.getSquare(oldgx, oldgy)->getColor() != turn);
+
+      // slect to be red
+      tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                   RED);
+      // move
+      do
+      {
+        readCoordinates();
+        Serial.print(cx);
+        Serial.print(" ");
+        Serial.println(cy);
+        newgx = (900 - cx) / 90, newgy = (945 - cy) / 72.5;
+
+        // change the selected
+        if (b.getSquare(newgx, newgy)->getColor() == turn)
+        {
+          tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
+                       RED);
+          tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                       (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
+          oldgx = newgx, oldgy = newgy;
+        }
+
+      } while ((newgx == oldgx && newgy == oldgy) ||
+               b.makeMove(oldgx, oldgy, newgx, newgy) == false);
+
+      // For Debug
+      Serial.print("old x: ");
+      Serial.print(oldgx);
+      Serial.print(" old y: ");
+      Serial.println(oldgy);
+
+      // For Debug
+      Serial.print("new x: ");
+      Serial.print(newgx);
+      Serial.print(" new y: ");
+      Serial.println(newgy);
+
+      // tft.drawRect(newgx * dispx / 8, newgy * dispx / 8, dispx / 8, dispx / 8,
+      //              RED);
+
+      // Color recovery
+      tft.drawRect(oldgx * dispx / 8, oldgy * dispx / 8, dispx / 8, dispx / 8,
+                   (oldgx + oldgy) % 2 == 0 ? WWHITE : BLUE);
+
+      // char *tmp = PIECE[oldgy][oldgx];
+      // PIECE[oldgy][oldgx] = PIECE[newgy][newgx];
+      // PIECE[newgy][newgx] = tmp;
+
+      // show the board after move
+      drawBoard();
+      setPieces();
+      turn = turn == BLACK ? WHITE : BLACK;
+      // notYetChange = false;
+
+      // check if it is checkmate
+      if (b.checkCheckMate() != NONE)
+      {
+        game = false;
+        endGameReport();
+      }
+    }
+  }
   // readCoordinates();
   // Serial.println(cx);
   // Serial.println(cy);
@@ -403,7 +485,7 @@ void readCoordinates()
       }
       else
         failcount++;
-    } while ((cnt < iter) && (failcount < 10000));
+    } while ((cnt < iter));
     if (cnt >= iter)
     {
       OK = true;
@@ -558,12 +640,41 @@ void startup()
   tft.fillRect(dispx / 4, dispy * 2 / 3, dispx / 2, 40, WWHITE);
   buttonPrint("Simple AI", dispy / 3 + 20, WWHITE, BLUE);
   buttonPrint("Normal", dispy * 2 / 3 + 20, BBLACK, WWHITE);
-  while (ISPRESSED() == false)
+
+  // wait for touch
+  // while (ISPRESSED() == false)
+  // {
+  // }
+
+  // chose the game mode
+  readCoordinates();
+
+  cx = 900 - cx, cy = 945 - cy;
+  if (cz > 150)
   {
+    // if (cx >= dispx / 4 && cx <= dispx / 4 + dispx / 2)
+    // {
+    // if (cy >= dispy / 3 && cy <= dispy / 3 + 40)
+    //   gameMode = 0;
+    // else if (cy >= dispy * 2 / 3 && cy <= dispy * 2 / 3 + 40)
+    //   gameMode = 1;
+    // }
+    if (cy < 450)
+    {
+      gameMode = 0;
+    }
+    else
+    {
+      gameMode = 1;
+    }
   }
-  while (ISPRESSED() == true)
-  {
-  }
+  // For Debug
+  // Serial.println(dispx);
+  // Serial.println(dispy);
+  // Serial.println(cx);
+  // Serial.println(cy);
+  // Serial.println(cz);
+  Serial.println(gameMode);
   //    waitForTouch();
 }
 
